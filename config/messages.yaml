@@ -1,0 +1,19 @@
+validation:
+  login:
+    not_found: 'Пользователь с таким логином не найден'
+    passwords_mismatch: 'Пароли не совпадают'
+    unverified_account: 'Ваш аккаунт ещё не прошёл проверку. Пожалуйста, повторите позже.'
+  common:
+    field_absence: 'Недостаточно данных для обработки'
+  register:
+    email_exists: 'Пользователь с таким email уже зарегистрирован'
+    email_validity: 'Указанный email не прошёл проверку'
+    lang: 'Использованы запрещенные символы'
+    short_username: 'Слишком короткое имя пользователя'
+    username_exists: 'Пользователь с таким логином уже зарегистрирован'
+    password_absence: 'Один из паролей отсутствует'
+    weak_password: 'Слишком слабый пароль'
+    passwords_mismatch: 'Пароли не совпадают'
+    undentifiend_source: 'Источник не подтверждён'
+  sources:
+    exists: 'Источник с таким именем уже существует'
