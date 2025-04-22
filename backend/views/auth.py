@@ -21,7 +21,7 @@ def login():
 @auth.route('/me', methods=['GET'])
 @jwt_required()
 def user_info():
-  return jsonify(dict(status='success', granted=bool(current_user)))
+  return jsonify(dict(status='success', body=current_user.json))
 
 @auth.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)

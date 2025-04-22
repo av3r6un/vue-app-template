@@ -1,5 +1,5 @@
-import axios from "axios";
-import store from "../store";
+import axios from 'axios';
+import store from '../store';
 import router from '../router';
 
 const api = axios.create({
@@ -7,28 +7,33 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = store.state.accessToken;
-  // eslint-disable-next-line
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  const token = config.url === '/auth/refresh' ? store.getters.refreshToken : store.getters.accessToken;
+  const { headers } = config;
+  if (token) headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+let isRetry = false;
 
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
-    const originalRequest = err.config;
-    if (err.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+    const { response, config } = err;
+    if (response?.status === 401 && !isRetry) {
+      isRetry = true;
       try {
-        await store.dispatch('refreshToken');
-        return api(originalRequest);
+        const newToken = await store.dispatch('refresh');
+        if (!newToken) router.push('/auth');
+        config.headers.Authorization = `Bearer ${newToken}`;
+        return api(config);
       } catch (e) {
-        store.dispatch('logout');
-        router.push('/login');
+        if (e.response.data.msg === 'THE') {
+          router.push('/auth');
+        }
       }
     }
     return Promise.reject(err);
-  }
+  },
 );
 
 export default api;

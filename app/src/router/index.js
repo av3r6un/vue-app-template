@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import store from '../store';
 import HomeView from '../views/HomeView.vue';
+import Login from '../views/LoginView.vue';
+import Register from '../views/RegisterView.vue';
+import Restore from '../views/RestoreView.vue';
 
 const routes = [
   {
@@ -10,7 +13,7 @@ const routes = [
   },
   { path: '/auth', component: Login },
   { path: '/register', component: Register },
-  { path: '/restore' , component: Restore },
+  { path: '/restore', component: Restore },
 ];
 
 const router = createRouter({
@@ -18,9 +21,9 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _, next) => {
   if (to.meta.requiresAuth && !store.getters.isAuth) {
-    next('/login');
+    next('/auth');
   } else {
     next();
   }

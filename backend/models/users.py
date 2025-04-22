@@ -31,7 +31,7 @@ class User(db.Model):
     self.reg_ip = reg_ip
     self.reg_date = reg_date if reg_date else int(dt.now().timestamp())
     self.last_ip = reg_ip
-    self.last_date = reg_date
+    self.last_date = self.reg_date
     device = Device(self.uid, user_agent)
     self.last_device = device.uid
 
@@ -86,14 +86,14 @@ class User(db.Model):
     if not bcrypt.check_password_hash(self.password, password):
       raise ValidationError('register', 'passwords_mismatch')
     self.last_ip = last_ip
-    device = Device(**self._validate_user_agent(user_agent))
+    device = Device(self.uid, user_agent)
     self.last_device = device.uid
     extra = dict(
       accs_token=create_access_token(self.username, fresh=True),
       rfsh_token=create_refresh_token(self.username)
     )
     db.session.commit()
-    return self.collect_info(**extra)
+    return self.collect_info(**dict(tokens=extra))
   
   def collect_info(self, **kwargs) -> dict:
     info = self.base_info
@@ -107,7 +107,7 @@ class User(db.Model):
   @property
   def json(self):
     bi = self.base_info
-    bi.update(dict(last_ip=self.last_ip, last_date=self.last_date, last_device=self.last_device.json))
+    bi.update(dict(last_ip=self.last_ip, last_date=self.last_date, last_device=self.last_device))
     return bi
   
 
@@ -117,9 +117,9 @@ class Device(db.Model):
   uid = db.Column(db.String(16), primary_key=True)
   used_by = db.Column(db.String(6), db.ForeignKey(User.uid), nullable=False)
   browser = db.Column(db.String(30), nullable=False)
-  browser_version = db.Column(db.Float, nullable=False)
+  browser_version = db.Column(db.Text, nullable=False)
   os = db.Column(db.String(20), nullable=False)
-  os_version = db.Column(db.Float, nullable=False)
+  os_version = db.Column(db.Text, nullable=False)
   device = db.Column(db.String(30), nullable=False)
   user_agent = db.Column(db.Text, nullable=False)
 
@@ -141,9 +141,9 @@ class Device(db.Model):
     self.user_agent = user_agent
     ua = parse(user_agent)
     self.browser = ua.browser.family
-    self.browser_version = float(ua.browser.version_string)
+    self.browser_version = ua.browser.version_string
     self.os = ua.os.family
-    self.os_version = float(ua.os.version_string)
+    self.os_version = ua.os.version_string
     self.device = ua.device.family
     
   @property
