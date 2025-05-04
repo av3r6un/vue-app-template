@@ -18,10 +18,12 @@ def login():
   except ValidationError as valid:
     return jsonify(valid.json), 400
   
+
 @auth.route('/me', methods=['GET'])
 @jwt_required()
 def user_info():
   return jsonify(dict(status='success', body=current_user.json))
+
 
 @auth.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
@@ -29,6 +31,7 @@ def refresh():
   iden = get_jwt_identity()
   token = User.refresh(iden)
   return jsonify(dict(status='success', token=token))
+
 
 @auth.route('/register', methods=['POST'])
 def register():
